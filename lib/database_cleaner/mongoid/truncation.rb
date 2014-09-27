@@ -27,7 +27,7 @@ module DatabaseCleaner
         private
 
         def session
-          ::Mongoid.default_session
+          ::Mongoid.sessions.keys.collect { |s| ::Mongoid.session(s) }
         end
 
       end

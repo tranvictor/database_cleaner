@@ -9,9 +9,13 @@ module DatabaseCleaner
 
       def clean
         if @only
-          collections.each { |c| session[c].find.remove_all if @only.include?(c) }
+          collections.each do |s, c|
+              s[c].find.remove_all if @only.include?(c)
+          end
         else
-          collections.each { |c| session[c].find.remove_all unless @tables_to_exclude.include?(c) }
+          collections.each do |s, c|
+            s[c].find.remove_all unless @tables_to_exclude.include?(c)
+          end
         end
         true
       end
@@ -23,10 +27,14 @@ module DatabaseCleaner
           session.use(db)
         end
 
-        session['system.namespaces'].find(:name => { '$not' => /\.system\.|\$/ }).to_a.map do |collection|
-          _, name = collection['name'].split('.', 2)
-          name
+        result = []
+        session.each do |s|
+          s['system.namespaces'].find(:name => { '$not' => /\.system\.|\$/ }).to_a.each do |collection|
+            _, name = collection['name'].split('.', 2)
+            result << [s, name]
+          end
         end
+        result
       end
 
     end
